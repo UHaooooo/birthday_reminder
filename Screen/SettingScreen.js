@@ -11,7 +11,7 @@ export default class SettingScreen extends Component<Props> {
 	 * A screen component can set navigation options such as the title.
 	 */
 	static navigationOptions = {
-		title: 'Navigation Demo',
+		title: 'Setting Mou',
 	};
 
 	render() {

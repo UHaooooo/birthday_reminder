@@ -11,7 +11,8 @@ import {
 import {
 	Avatar,
 	Card,
-	ListItem
+	ListItem,
+	SearchBar
 } from 'react-native-elements';
 import {
 	getTheme,
@@ -58,7 +59,7 @@ Date.prototype.getAge = function getAge() {
 export default class AllScreen extends Component<Props> {
 
 	static navigationOptions = {
-		title: 'ALL',
+		title:'All',
 	};
 
 	constructor(props) {
@@ -172,9 +173,34 @@ export default class AllScreen extends Component<Props> {
 		console.log('SQL Error: ' + err);
 	}
 
+	state = {
+		searchClearIcon: false
+	}
+
+	_onChangeSearchText = (searchText) => {
+		if(searchText){
+			this.setState({searchClearIcon: true})
+		}else{
+			this.setState({searchClearIcon:false})
+		}
+	}
+
 	render() {
 		return (
 			<View style={styles.container}>
+				<SearchBar
+					round
+					containerStyle={{backgroundColor: '#FF6600'}} 
+					inputStyle={{backgroundColor: '#fffff0'}} 
+					icon={{color:'gray'}}
+					placeholder='Search'
+					lightTheme
+					placeholderTextColor='gray'
+					clearIcon={this.state.searchClearIcon}
+					onChangeText={this._onChangeSearchText}
+					//onClearText={someMethod}
+					placeholder='Search...' 
+				/>
 				<FlatList
 					style={styles.sectionList}
 					data={this.state.birthdayList}

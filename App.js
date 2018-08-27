@@ -4,6 +4,14 @@ import {
 	createStackNavigator,
 	createBottomTabNavigator
 } from 'react-navigation';
+import{
+	View,
+	Text,
+	TouchableNativeFeedback
+} from 'react-native';
+import{
+	Icon
+} from 'react-native-elements';
 import HomeScreen from './Screen/HomeScreen';
 import PeopleScreen from './Screen/PeopleScreen';
 import SettingScreen from './Screen/SettingScreen';
@@ -40,9 +48,28 @@ let TabNavigator = createBottomTabNavigator({
 let StackNavigator = createStackNavigator({
 	Home: {
 		screen: TabNavigator,
-		navigationOptions: {
-			title: "Birthday Reminder",
-		}
+		/*navigationOptions:{
+			headerTitle: 'Birthday Reminder',
+		}*/
+		navigationOptions: ({ navigation }) => ({
+			headerTitle: 'Birthday Mou',
+			headerRight: 
+				<View style={{paddingRight:15}}>
+					<Icon
+						name='settings'
+						size={32}
+						color= '#ffffff'
+						underlayColor='#FF6600'
+						onPress={
+							()=> {
+								navigation.navigate('Setting',{
+									//refresh:this._query,
+								})
+							}
+						}
+					/>
+				</View>
+		})
 	},
 	Setting: {
 		screen: SettingScreen
@@ -67,10 +94,11 @@ let StackNavigator = createStackNavigator({
 	});
 
 type Props = {};
+
 export default class App extends Component<Props> {
 	render() {
 		return (
-			<StackNavigator />
+				<StackNavigator />
 		);
 	}
 }
