@@ -139,7 +139,7 @@ export default class PeopleScreen extends Component<Props> {
 				>
 					<Text pointerEvents="none"
 						style={{ color: 'white', fontWeight: 'bold', textAlign: 'center' }}>
-						SAVE
+						ADD
   					</Text>
 				</MKButton>
 			</ScrollView>

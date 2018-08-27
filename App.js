@@ -19,6 +19,7 @@ import MonthScreen from './Screen/MonthScreen';
 import AllScreen from './Screen/AllScreen';
 import CalendarScreen from './Screen/CalendarScreen';
 import CreateScreen from './Screen/CreateScreen';
+import EditScreen from './Screen/EditScreen';
 
 let TabNavigator = createBottomTabNavigator({
 	Month: {
@@ -62,9 +63,7 @@ let StackNavigator = createStackNavigator({
 						underlayColor='#FF6600'
 						onPress={
 							()=> {
-								navigation.navigate('Setting',{
-									//refresh:this._query,
-								})
+								navigation.navigate('Setting')
 							}
 						}
 					/>
@@ -79,6 +78,9 @@ let StackNavigator = createStackNavigator({
 	},
 	Create: {
 		screen: CreateScreen
+	},
+	Edit:{
+		screen: EditScreen
 	},
 }, {
 		initialRouteName: 'Home',
