@@ -5,6 +5,8 @@ import {
 	View,
 	TouchableNativeFeedback,
 	Alert,
+	Clipboard,
+	ToastAndroid
 } from 'react-native';
 import {
 	Card,
@@ -106,25 +108,6 @@ export default class SettingScreen extends Component<Props> {
 		}));
 	}
 
-	_backup() {
-		Alert.alert('Your records will be backup to cloud.', 'Are you sure?', [
-			{
-				text: 'Yes',
-				onPress: () => {
-					// use fetch to store data to cloud database
-					// if backup code found, delete all its birthday_record, insert all from local into table
-					// if backup code not found, alert not found, toggle backup modal
-					//after done, setState backupCode = ''
-					Alert.alert(this.state.backupCode);
-				},
-			},
-			{
-				text: 'No',
-				onPress: () => { },
-			},
-		], { cancelable: false });
-	}
-
 	_firstTimeBackup() {
 		this.setState({
 			backupCode: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
@@ -137,8 +120,33 @@ export default class SettingScreen extends Component<Props> {
 					// use fetch to store data to cloud database
 					// insert a new user using the backup code
 					// use that user_id, insert many birthday record
-					// after done, setState backupCode = ''
+					// after done, show modal with Backup Code
+					// After the modal closed, setState backupCode = ''
+					//Alert.alert(this.state.backupCode);
+					this._toggleScreenshotModal();
+				},
+			},
+			{
+				text: 'No',
+				onPress: () => { },
+			},
+		], { cancelable: false });
+	}
+
+	_backup() {
+		Alert.alert('Your records will be backup to cloud.', 'Are you sure?', [
+			{
+				text: 'Yes',
+				onPress: () => {
+					// use fetch to store data to cloud database
+					// if backup code found, delete all its birthday_record, insert all from local into table
+					// if backup code not found, alert not found, toggle backup modal
+					//after done, setState backupCode = ''
 					Alert.alert(this.state.backupCode);
+					this._toggleBackupModal();
+					this.setState({
+						backupCode: ''
+					});
 				},
 			},
 			{
@@ -149,7 +157,7 @@ export default class SettingScreen extends Component<Props> {
 	}
 
 	_restore() {
-		Alert.alert('Local data will be restored and replaced by data from cloud.', 'Are you sure?', [
+		Alert.alert('Local data will be wiped and replaced by data from cloud.', 'Are you sure?', [
 			{
 				text: 'Yes',
 				onPress: () => {
@@ -158,6 +166,10 @@ export default class SettingScreen extends Component<Props> {
 					// if backup code not found, alert not found, toggle backup modal
 					//after done, setState backupCode = ''
 					Alert.alert(this.state.backupCode);
+					this._toggleRestoreModal();
+					this.setState({
+						backupCode: ''
+					});
 				},
 			},
 			{
@@ -242,6 +254,32 @@ export default class SettingScreen extends Component<Props> {
 										errorMessage: 'Please enter backup code!'
 									})
 								}
+							}}
+						/>
+					</Card>
+				</Modal>
+				<Modal
+					isVisible={this.state.isScreenshotModalVisible}
+					style={{ flex: 1 }}
+					onBackdropPress={() => {
+						this._toggleScreenshotModal();
+						this.setState({
+							backupCode: ''
+						});
+					}}
+				>
+					<Card style={{ flex: 1 }}>
+						<Text style={{ textAlign: 'center', fontSize: 20 }}>Copy or Screenshot Backup Bode</Text>
+						<Text style={{ textAlign: 'center', fontWeight: 'bold', fontSize: 24, marginTop: 20 }}>Backup Code:</Text>
+						<Text style={{ textAlign: 'center', fontWeight: 'bold', fontSize: 24, marginBottom: 20 }}>{this.state.backupCode}</Text>
+						<FormValidationMessage>Backup code is required every time for backup and restore</FormValidationMessage>
+						<Button
+							title='COPY TO CLIPBOARD'
+							backgroundColor='#99CC33'
+							buttonStyle={{ margin: 20 }}
+							onPress={() => {
+								Clipboard.setString(this.state.backupCode);
+								ToastAndroid.show('Backup code copied to clipboard!', ToastAndroid.SHORT, ToastAndroid.CENTER);
 							}}
 						/>
 					</Card>
