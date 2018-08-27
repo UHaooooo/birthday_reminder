@@ -23,8 +23,6 @@ import { FloatingAction } from 'react-native-floating-action';
 
 let SQLite = require('react-native-sqlite-storage');
 
-const theme = getTheme();
-
 const actions = [{
 	text: 'Create',
 	icon: require('../images/baseline_add_white_18dp.png'),
