@@ -220,6 +220,15 @@ export default class AllScreen extends Component<Props> {
 												title={u.name}
 												subtitle={u.birthday}
 												containerStyle={{ borderBottomWidth: 0 }}
+												onPress={
+													() => {
+														this.props.navigation.navigate('People',{
+															id: u.id,
+															headerTitle: u.name,
+															refresh: this._query,
+														})
+													}
+												}
 											/>
 										</TouchableNativeFeedback>
 									);
