@@ -4,12 +4,12 @@ import {
 	createStackNavigator,
 	createBottomTabNavigator
 } from 'react-navigation';
-import{
+import {
 	View,
 	Text,
 	TouchableNativeFeedback
 } from 'react-native';
-import{
+import {
 	Icon
 } from 'react-native-elements';
 import HomeScreen from './Screen/HomeScreen';
@@ -54,17 +54,17 @@ let StackNavigator = createStackNavigator({
 		}*/
 		navigationOptions: ({ navigation }) => ({
 			headerTitle: 'Birthday Mou',
-			headerRight: 
-				<View style={{paddingRight:15}}>
+			headerRight:
+				<View style={{ paddingRight: 15 }}>
 					<Icon
 						name='settings'
 						size={32}
-						color= '#ffffff'
+						color='#ffffff'
 						underlayColor='#FF6600'
 						onPress={
-							()=> {
+							() => {
 								navigation.navigate('Setting',{
-									//refresh:this._query,
+									refresh: this._query,
 								})
 							}
 						}
@@ -81,7 +81,7 @@ let StackNavigator = createStackNavigator({
 	Create: {
 		screen: CreateScreen
 	},
-	Edit:{
+	Edit: {
 		screen: EditScreen
 	},
 }, {
@@ -102,7 +102,7 @@ type Props = {};
 export default class App extends Component<Props> {
 	render() {
 		return (
-				<StackNavigator />
+			<StackNavigator />
 		);
 	}
 }

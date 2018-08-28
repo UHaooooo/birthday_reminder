@@ -23,10 +23,9 @@ import {
 
 let SQLite = require('react-native-sqlite-storage');
 
+let serverPath = 'http://10.0.2.2:5000';
+
 export default class SettingScreen extends Component<Props> {
-	/**
-	 * A screen component can set navigation options such as the title.
-	 */
 	static navigationOptions = {
 		title: 'Setting Mou',
 	};
@@ -40,9 +39,11 @@ export default class SettingScreen extends Component<Props> {
 			isScreenshotModalVisible: false,
 			isBackupModalVisible: false,
 			isRestoreModalVisible: false,
-			errorMessage: ''
+			errorMessage: '',
+			people: [],
 		};
 
+		this._insert = this._insert.bind(this);
 		this._firstTimeBackup = this._firstTimeBackup.bind(this);
 		this._backup = this._backup.bind(this);
 		this._restore = this._restore.bind(this);
@@ -108,22 +109,118 @@ export default class SettingScreen extends Component<Props> {
 		}));
 	}
 
+	_insert(count) {
+		this.db.transaction((tx) => {
+			tx.executeSql('INSERT INTO peoples(name,birthday) VALUES(?,?)', [
+				this.state.people[count].name,
+				this.state.people[count].birthday,
+			])
+		});
+	}
+
 	_firstTimeBackup() {
 		this.setState({
 			backupCode: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
 		})
 
-		Alert.alert('Your records will be backup to cloud.', 'Are you sure?', [
+		Alert.alert('Your local data will be backup to cloud.', 'Cloud data will be replaced by local data. Are you sure?', [
 			{
 				text: 'Yes',
 				onPress: () => {
-					// use fetch to store data to cloud database
-					// insert a new user using the backup code
-					// use that user_id, insert many birthday record
-					// after done, show modal with Backup Code
-					// After the modal closed, setState backupCode = ''
-					//Alert.alert(this.state.backupCode);
-					this._toggleScreenshotModal();
+					var user_id_fk;
+
+					fetch(serverPath + '/api/addUser', {
+						method: 'POST',
+						headers: {
+							Accept: 'application/json',
+							'Content-Type': 'application/json',
+						},
+						body: JSON.stringify({
+							backupCode: this.state.backupCode
+						}),
+					})
+						.then((response) => {
+							if (!response.ok) {
+								Alert.alert('Error', response.status.toString());
+								throw Error('Error ' + response.status);
+							}
+
+							return response.json()
+						})
+						.then((responseJson) => {
+							if (responseJson.affected > 0) {
+								user_id_fk = responseJson.id;
+
+								fetch(serverPath + '/api/delete-all-birthday-record/' + user_id_fk, {
+									method: 'DELETE',
+									headers: {
+										Accept: 'application/json',
+										'Content-Type': 'application/json',
+									},
+									body: JSON.stringify({
+										user_id_fk: user_id_fk,
+									}),
+								})
+									.then((response) => {
+										if (!response.ok) {
+											Alert.alert('Error', response.status.toString());
+											throw Error('Error ' + response.status);
+										}
+									})
+									.then((responseJson) => {
+										this.db.transaction((tx) => {
+											tx.executeSql('SELECT * FROM peoples ORDER BY name ASC', [], (tx, results) => {
+												let people = [];
+												people = results.rows.raw();
+												var count = 0;
+
+												function save() {
+													fetch(serverPath + '/api/add-birthday-record', {
+														method: 'POST',
+														headers: {
+															Accept: 'application/json',
+															'Content-Type': 'application/json',
+														},
+														body: JSON.stringify({
+															name: people[count].name,
+															birthday: people[count].birthday,
+															user_id_fk: user_id_fk
+														}),
+													})
+														.then((response) => {
+															if (!response.ok) {
+																Alert.alert('Error', response.status.toString());
+																throw Error('Error ' + response.status);
+															} else {
+																count++;
+
+																if (count < people.length) {
+																	save();
+																}
+															}
+														})
+														.catch((error) => {
+															console.log(error);
+														});
+												}
+
+												save();
+
+												this._toggleScreenshotModal();
+											})
+										});
+									})
+									.catch((error) => {
+										console.error(error);
+									});
+							}
+							else {
+								Alert.alert('Error backing up data', 'No data backed up');
+							}
+						})
+						.catch((error) => {
+							console.log(error);
+						});
 				},
 			},
 			{
@@ -134,19 +231,99 @@ export default class SettingScreen extends Component<Props> {
 	}
 
 	_backup() {
-		Alert.alert('Your records will be backup to cloud.', 'Are you sure?', [
+		Alert.alert('Your local data will be backup to cloud.', 'Cloud data will be replaced by local data. Are you sure?', [
 			{
 				text: 'Yes',
 				onPress: () => {
-					// use fetch to store data to cloud database
-					// if backup code found, delete all its birthday_record, insert all from local into table
-					// if backup code not found, alert not found, toggle backup modal
-					//after done, setState backupCode = ''
-					Alert.alert(this.state.backupCode);
-					this._toggleBackupModal();
-					this.setState({
-						backupCode: ''
-					});
+					var user_id_fk;
+
+					fetch(serverPath + '/api/user/' + this.state.backupCode)
+						.then((response) => {
+							if (!response.ok) {
+								Alert.alert('Error', response.status.toString());
+								throw Error('Error ' + response.status);
+							}
+
+							return response.json()
+						})
+						.then((responseJson) => {
+							if (responseJson.id == '') {
+								Alert.alert("Backup Code not found!");
+							} else {
+								user_id_fk = responseJson.id;
+
+								fetch(serverPath + '/api/delete-all-birthday-record/' + user_id_fk, {
+									method: 'DELETE',
+									headers: {
+										Accept: 'application/json',
+										'Content-Type': 'application/json',
+									},
+									body: JSON.stringify({
+										user_id_fk: user_id_fk,
+									}),
+								})
+									.then((response) => {
+										if (!response.ok) {
+											Alert.alert('Error', response.status.toString());
+											throw Error('Error ' + response.status);
+										}
+									})
+									.then((responseJson) => {
+										this.db.transaction((tx) => {
+											tx.executeSql('SELECT * FROM peoples ORDER BY name ASC', [], (tx, results) => {
+												let people = [];
+												people = results.rows.raw();
+												var count = 0;
+
+												function save() {
+													fetch(serverPath + '/api/add-birthday-record', {
+														method: 'POST',
+														headers: {
+															Accept: 'application/json',
+															'Content-Type': 'application/json',
+														},
+														body: JSON.stringify({
+															name: people[count].name,
+															birthday: people[count].birthday,
+															user_id_fk: user_id_fk
+														}),
+													})
+														.then((response) => {
+															if (!response.ok) {
+																Alert.alert('Error', response.status.toString());
+																throw Error('Error ' + response.status);
+															} else {
+																count++;
+
+																if (count < people.length) {
+																	save();
+																}
+															}
+														})
+														.catch((error) => {
+															console.log(error);
+														});
+												}
+
+												save();
+
+												Alert.alert("Backup Success");
+
+												this._toggleBackupModal();
+												this.setState({
+													backupCode: ''
+												});
+											})
+										});
+									})
+									.catch((error) => {
+										console.error(error);
+									});
+							}
+						})
+						.catch((error) => {
+							console.log(error);
+						});
 				},
 			},
 			{
@@ -161,15 +338,73 @@ export default class SettingScreen extends Component<Props> {
 			{
 				text: 'Yes',
 				onPress: () => {
-					// use fetch to get data from cloud database
-					// if backup code found, delete all local records, insert all from cloud to local into table
-					// if backup code not found, alert not found, toggle backup modal
-					//after done, setState backupCode = ''
-					Alert.alert(this.state.backupCode);
-					this._toggleRestoreModal();
-					this.setState({
-						backupCode: ''
-					});
+					var user_id_fk;
+
+					fetch(serverPath + '/api/user/' + this.state.backupCode)
+						.then((response) => {
+							if (!response.ok) {
+								Alert.alert('Error', response.status.toString());
+								throw Error('Error ' + response.status);
+							}
+
+							return response.json()
+						})
+						.then((responseJson) => {
+							if (responseJson.id == '') {
+								Alert.alert("Backup Code not found!");
+							} else {
+								user_id_fk = responseJson.id;
+
+								this.db.transaction((tx) => {
+									tx.executeSql('DELETE FROM peoples')
+								}, [], () => {
+									fetch(serverPath + '/api/select-all-birthday-record/' + user_id_fk)
+										.then((response) => {
+											if (!response.ok) {
+												Alert.alert('Error', response.status.toString());
+												throw Error('Error ' + response.status);
+											}
+
+											return response.json()
+										})
+										.then((birthday_record) => {
+											this.setState({
+												people: birthday_record
+											});
+
+											var count = 0;
+
+											function test() {
+
+												this._insert(count);
+
+												count++;
+
+												if (count < people.length) {
+													test();
+												}
+											}
+
+											test();
+
+											Alert.alert("Restore Success ");
+										})
+										.catch((error) => {
+											console.log(error);
+										});
+								});
+
+								this._toggleRestoreModal();
+								this.setState({
+									backupCode: ''
+								});
+
+							}
+						})
+						.catch((error) => {
+							console.log(error);
+						});
+
 				},
 			},
 			{
@@ -204,6 +439,7 @@ export default class SettingScreen extends Component<Props> {
 							textInputStyle={{ color: '#000000' }}
 							onChangeText={(backupCode) => this.setState({ backupCode })}
 							style={{ marginLeft: 20, marginRight: 20 }}
+							selectTextOnFocus={true}
 						/>
 						<FormValidationMessage>{this.state.errorMessage}</FormValidationMessage>
 						<Button
@@ -238,6 +474,7 @@ export default class SettingScreen extends Component<Props> {
 							textInputStyle={{ color: '#000000' }}
 							onChangeText={(backupCode) => this.setState({ backupCode })}
 							style={{ marginLeft: 20, marginRight: 20 }}
+							selectTextOnFocus={true}
 						/>
 						<FormValidationMessage>{this.state.errorMessage}</FormValidationMessage>
 						<Button

@@ -80,7 +80,7 @@ export default class AllScreen extends Component<Props> {
 
 	_query() {
 		this.db.transaction((tx) => {
-			tx.executeSql('SELECT * FROM peoples ORDER BY name', [], (tx, results) => {
+			tx.executeSql('SELECT * FROM peoples ORDER BY name ASC', [], (tx, results) => {
 				var people = [];
 				var tempBirthdayList = [];
 				var birthdays = [
