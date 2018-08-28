@@ -186,7 +186,7 @@ export default class CalendarScreen extends Component<Props> {
 								}
 							}
 							if(allPeople != ''){
-								Alert.alert("Whose gonna birthday?!\n", allPeople);
+								Alert.alert("Tell them that you never forget their Birthday !!\n", allPeople);
 							}
 						}
 					}

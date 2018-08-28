@@ -62,8 +62,11 @@ export default class AllScreen extends Component<Props> {
 
 	constructor(props) {
 		super(props);
+
 		this.state = {
+			searchClearIcon:false,
 			birthdayList: [],
+			searchText:'',
 		}
 
 		this._query = this._query.bind(this);
@@ -73,14 +76,33 @@ export default class AllScreen extends Component<Props> {
 			createFromLocation: '~db.sqlite',
 		}, this.openDb, this.errorDb);
 	}
+	
+	_onChangeSearchText = (searchText) => {
+		if(searchText){
+			this.setState({
+				searchClearIcon: true,
+				searchText: searchText,
+			});
+		}else{
+			this.setState({
+				searchClearIcon:false,
+				searchText: '',
+			});
+    	}
+	}
 
 	componentDidMount() {
 		this._query();
 	}
 
+	componentDidUpdate() {
+		this._query();
+  	}
+
 	_query() {
+		var searchQuery = "%" + this.state.searchText + "%";
 		this.db.transaction((tx) => {
-			tx.executeSql('SELECT * FROM peoples', [], (tx, results) => {
+			tx.executeSql('SELECT * FROM peoples WHERE name LIKE ?', [searchQuery], (tx, results) => {
 				var people = [];
 				var tempBirthdayList = [];
 				var birthdays = [
@@ -171,18 +193,6 @@ export default class AllScreen extends Component<Props> {
 		console.log('SQL Error: ' + err);
 	}
 
-	state = {
-		searchClearIcon: false
-	}
-
-	_onChangeSearchText = (searchText) => {
-		if(searchText){
-			this.setState({searchClearIcon: true})
-		}else{
-			this.setState({searchClearIcon:false})
-		}
-	}
-
 	render() {
 		return (
 			<View style={styles.container}>
@@ -197,7 +207,7 @@ export default class AllScreen extends Component<Props> {
 					clearIcon={this.state.searchClearIcon}
 					onChangeText={this._onChangeSearchText}
 					//onClearText={someMethod}
-					placeholder='Search...' 
+					placeholder='Search name...' 
 				/>
 				<FlatList
 					style={styles.sectionList}

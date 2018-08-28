@@ -26,30 +26,40 @@ export default class MonthScreen extends Component<Props> {
 
     this.state = {
       searchClearIcon:false,
-      peoples:[]
+      peoples:[],
+      searchText:'',
     }
 
     this._query = this._query.bind(this);
 
     this.db = SQLite.openDatabase({name:'peoplesdb', createFromLocation:'~db.sqlite'},this.openDb, this.errorDb);
   }
+
   _onChangeSearchText = (searchText) => {
 		if(searchText){
-			this.setState({searchClearIcon: true})
+      this.setState({
+        searchClearIcon: true,
+        searchText: searchText,
+      });
 		}else{
-			this.setState({searchClearIcon:false})
-		}
+			this.setState({
+        searchClearIcon:false,
+        searchText: '',
+      });
+    }
 	}
 
   componentDidMount() {
 		this._query();
   }
+  componentDidUpdate(){
+    this._query();
+  }
   
   _query(){
+    var searchQuery = "%" + this.state.searchText + "%";
     this.db.transaction((tx) => {
-      tx.executeSql('SELECT * FROM peoples',[],
-      (tx,results)=> {
-        tx.executeSql('SELECT * FROM peoples', [], (tx, results) => {
+        tx.executeSql('SELECT * FROM peoples WHERE name LIKE ?', [searchQuery], (tx, results) => {
           var people = [];
           var birthdays = [
             {
@@ -133,7 +143,6 @@ export default class MonthScreen extends Component<Props> {
             birthdayList: tempBirthdayList
           });
       })
-      })
     })
   }
 
@@ -151,7 +160,7 @@ export default class MonthScreen extends Component<Props> {
 					clearIcon={this.state.searchClearIcon}
 					onChangeText={this._onChangeSearchText}
 					//onClearText={someMethod}
-					placeholder='Search...' 
+					placeholder='Search name...' 
 				/>
 				<FlatList
 					style={styles.sectionList}
