@@ -57,7 +57,7 @@ Date.prototype.getAge = function getAge() {
 export default class AllScreen extends Component<Props> {
 
 	static navigationOptions = {
-		title:'All',
+		title: 'All',
 	};
 
 	constructor(props) {
@@ -80,7 +80,7 @@ export default class AllScreen extends Component<Props> {
 
 	_query() {
 		this.db.transaction((tx) => {
-			tx.executeSql('SELECT * FROM peoples', [], (tx, results) => {
+			tx.executeSql('SELECT * FROM peoples ORDER BY name', [], (tx, results) => {
 				var people = [];
 				var tempBirthdayList = [];
 				var birthdays = [
@@ -176,10 +176,10 @@ export default class AllScreen extends Component<Props> {
 	}
 
 	_onChangeSearchText = (searchText) => {
-		if(searchText){
-			this.setState({searchClearIcon: true})
-		}else{
-			this.setState({searchClearIcon:false})
+		if (searchText) {
+			this.setState({ searchClearIcon: true })
+		} else {
+			this.setState({ searchClearIcon: false })
 		}
 	}
 
@@ -188,16 +188,16 @@ export default class AllScreen extends Component<Props> {
 			<View style={styles.container}>
 				<SearchBar
 					round
-					containerStyle={{backgroundColor: '#FF6600'}} 
-					inputStyle={{backgroundColor: '#fffff0'}} 
-					icon={{color:'gray'}}
+					containerStyle={{ backgroundColor: '#FF6600' }}
+					inputStyle={{ backgroundColor: '#fffff0' }}
+					icon={{ color: 'gray' }}
 					placeholder='Search'
 					lightTheme
 					placeholderTextColor='gray'
 					clearIcon={this.state.searchClearIcon}
 					onChangeText={this._onChangeSearchText}
 					//onClearText={someMethod}
-					placeholder='Search...' 
+					placeholder='Search...'
 				/>
 				<FlatList
 					style={styles.sectionList}
@@ -222,7 +222,7 @@ export default class AllScreen extends Component<Props> {
 												containerStyle={{ borderBottomWidth: 0 }}
 												onPress={
 													() => {
-														this.props.navigation.navigate('People',{
+														this.props.navigation.navigate('People', {
 															id: u.id,
 															headerTitle: u.name,
 															refresh: this._query,
