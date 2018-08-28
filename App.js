@@ -13,7 +13,6 @@ import {
 import {
 	Icon
 } from 'react-native-elements';
-import HomeScreen from './Screen/HomeScreen';
 import PeopleScreen from './Screen/PeopleScreen';
 import SettingScreen from './Screen/SettingScreen';
 import MonthScreen from './Screen/MonthScreen';
