@@ -32,6 +32,7 @@ export default class EditScreen extends Component<Props> {
       peopleId: this.props.navigation.getParam('id'),
       name: '',
       birthday: '',
+      date:'',
     };
 
     this._query = this._query.bind(this);
@@ -62,14 +63,13 @@ export default class EditScreen extends Component<Props> {
         this.db.transaction((tx) => {
             tx.executeSql('UPDATE peoples SET name=?,birthday=? WHERE id=?', [
                 this.state.name,
-                this.state.birthday,
+                this.state.date,
                 this.state.peopleId
             ]);
         });
         Alert.alert("Record updated successfully!");
         this.props.navigation.getParam('refresh')();
-        this.props.navigation.getParam('homeRefresh')();
-        this.props.navigation.goBack();
+		this.props.navigation.goBack();
 	} else {
 			Alert.alert("Please ensure all input are correct!");
 	}
