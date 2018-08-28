@@ -2,7 +2,8 @@
 import React, { Component } from 'react';
 import {
 	createStackNavigator,
-	createBottomTabNavigator
+	createBottomTabNavigator,
+	createTabNavigator
 } from 'react-navigation';
 import {
 	View,
@@ -21,7 +22,7 @@ import CalendarScreen from './Screen/CalendarScreen';
 import CreateScreen from './Screen/CreateScreen';
 import EditScreen from './Screen/EditScreen';
 
-let TabNavigator = createBottomTabNavigator({
+let TabNavigator = createTabNavigator({
 	Month: {
 		screen: MonthScreen,
 	},
@@ -33,16 +34,25 @@ let TabNavigator = createBottomTabNavigator({
 	}
 }, {
 		initialRouteName: 'All',
-		tabBarOptions: {
+		swipeEnabled:true,
+		tabBarPosition: 'bottom',
+		TabBarBottom: {
 			activeTintColor: '#FFFFFF',
 			inactiveTintColor: '#000000',
-			activeBackgroundColor: '#FF6600',
+			activeBackgroundColor:'#000000',
+			inactiveBackgroundColor:'#ffffff',
+			backgroundColor:'#000000',
 			labelStyle: {
 				fontSize: 20,
 			},
 			tabStyle: {
 				padding: 10,
-			}
+			},
+		},
+		tabBarOptions:{
+			style: {
+				backgroundColor: '#FF6600',
+			},
 		}
 	});
 
