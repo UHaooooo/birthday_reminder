@@ -372,22 +372,6 @@ export default class SettingScreen extends Component<Props> {
 												people: birthday_record
 											});
 
-											let count = 0;
-
-											/* function insertion() {
-
-												this._insert(count);
-
-												count++;
-
-												if (count < this.state.people.length) {
-													insertion();
-												}
-											}
-
-											insertion(); */
-
-
 											this.db.transaction((tx) => {
 												for (var i = 0; i < this.state.people.length; i++) {
 													tx.executeSql('INSERT INTO peoples(name,birthday) VALUES(?,?)', [
