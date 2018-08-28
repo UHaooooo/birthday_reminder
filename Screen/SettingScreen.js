@@ -471,7 +471,7 @@ export default class SettingScreen extends Component<Props> {
 						/>
 						<FormValidationMessage>{this.state.errorMessage}</FormValidationMessage>
 						<Button
-							title='BACKUP'
+							title='RESTORE'
 							backgroundColor='#99CC33'
 							onPress={() => {
 								if (this.state.backupCode != '' && this.state.backupCode != null) {
