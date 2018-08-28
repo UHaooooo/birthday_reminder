@@ -372,22 +372,32 @@ export default class SettingScreen extends Component<Props> {
 												people: birthday_record
 											});
 
-											var count = 0;
+											let count = 0;
 
-											function test() {
+											/* function insertion() {
 
 												this._insert(count);
 
 												count++;
 
-												if (count < people.length) {
-													test();
+												if (count < this.state.people.length) {
+													insertion();
 												}
 											}
 
-											test();
+											insertion(); */
 
-											Alert.alert("Restore Success ");
+
+											this.db.transaction((tx) => {
+												for (var i = 0; i < this.state.people.length; i++) {
+													tx.executeSql('INSERT INTO peoples(name,birthday) VALUES(?,?)', [
+														this.state.people[i].name,
+														this.state.people[i].birthday
+													]);
+												}
+											});
+
+											Alert.alert("Restore Success");
 										})
 										.catch((error) => {
 											console.log(error);
@@ -398,7 +408,6 @@ export default class SettingScreen extends Component<Props> {
 								this.setState({
 									backupCode: ''
 								});
-
 							}
 						})
 						.catch((error) => {
